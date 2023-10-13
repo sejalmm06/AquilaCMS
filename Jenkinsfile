@@ -22,7 +22,7 @@ pipeline {
             steps {
                 script {
                     // Use Node.js version from Global Tool Configuration
-                    def nodejsTool = tool name: 'Node14', type: 'NodeJS'
+                    def nodejsTool = tool name: 'NodeJS', type: 'NodeJS'
 
 
                     if (nodejsTool) {

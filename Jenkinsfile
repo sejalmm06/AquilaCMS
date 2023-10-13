@@ -9,7 +9,7 @@ pipeline {
         CONTAINER_NAME = "aquilacms"
         DOCKER_TAG = "latest"
         DOCKER_HUB_USER = "sejalmm06"
-        REACT_APP_THEME = 'theme2'
+       REACT_APP_THEME = 'theme2'
     }
 
     stages {

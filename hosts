@@ -1,4 +1,8 @@
-[webservers]
+[bastion_host]
+3.110.157.9
+
+[app_server]
 10.0.2.211
-[webservers:vars]
-ansible_ssh_user="ubuntu"
+
+[db_server]
+10.0.4.127

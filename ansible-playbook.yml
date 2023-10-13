@@ -1,30 +1,22 @@
 ---
 - name: Deploy My Project in a Docker Container
-  hosts: all
+  hosts : all
   become: true
-  tasks:
-    - name: Updating apt
-      apt:
-        update_cache: yes
+  connection : ssh
+  tasks : 
+  - name: updating apt
+    command : sudo apt-get update
 
-    - name: Install Docker
-      apt:
-        name: docker.io
-        state: present
+  - name : Install Docker
+    command : sudo apt-get install -y docker.io
+    become : yes
+    become_user : root
 
-    - name: Start Docker Service
-      service:
-        name: docker
-        state: started
+  - name : Start Docker Service
+    command : sudo systemctl start docker
+    become : yes
+    become_user : root
 
-    - name: Pull Docker Image
-      command: docker pull sejalmm06/aquilacms:latest
+  - name: Deploy Docker Container
+    command: docker run -itd -p 3010:3010 sejalmm06/aquilacms:latest
 
-    - name: Create Docker Network
-      command: docker network create aquila
-
-    - name: Run MongoDB Container
-      command: docker run --name mongo -p 27017:27017 --network=aquila mongo
-
-    - name: Run Aquila CMS Container
-      command: docker run -p 127.0.0.1:3010:3010/tcp --network=aquila --name aquila sejalmm06/aquilacms:latest

@@ -1,0 +1,24 @@
+---
+- name: Deploy My Project in a Docker Container
+  hosts: all
+  become: true
+  tasks:
+    - name: Updating apt
+      apt:
+        update_cache: yes
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start Docker Service
+      service:
+        name: docker
+        state: started
+
+    - name: Pull Docker Image
+      command: docker pull sejalmm06/aquilacms:latest
+
+    - name: Deploy Docker Container
+      command: docker run -itd -p 8084:8081 aquilacm:latest

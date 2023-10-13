@@ -17,16 +17,16 @@ pipeline {
                 checkout scm
             }
         }
-
-        stage('Build and Package') {
+ stage('Build and Package') {
             steps {
                 script {
-                    
-             sh "npm install" // Install Node.js dependencies
-                sh "npm run build" // Build your Node.js application
-                sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ." // Build the Docker image
+                    sh "npm install" // Install Node.js dependencies
+                    sh "npm run build" // Build your Node.js application
+                    sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ." // Build the Docker image
+                }
             }
         }
+
 
         stage('Publish Test Reports') {
             steps {

@@ -19,7 +19,7 @@ pipeline {
             }
         }
 
-       stage('Build and Package') {
+        stage('Build and Package') {
             steps {
                 script {
                     // Install npm dependencies
@@ -42,18 +42,19 @@ pipeline {
             }
         }
 
-     stage('Docker Tag and Push') {
-    steps {
-        script {
-            def containerName = "aquilacms"
-            def tag = "latest"
+        stage('Docker Tag and Push') {
+            steps {
+                script {
+                    def containerName = "aquilacms"
+                    def tag = "latest"
 
-            sh "docker tag $CONTAINER_NAME:$DOCKER_TAG" $DOCKER_HUB_USER/$CONTAINER_NAME:$DOCKER_TAG"
-            sh "docker push $DOCKER_HUB_USER/$CONTAINER_NAME:$DOCKER_TAG "
-            echo "Image push complete"
+                    sh "docker tag ${containerName}:${tag} $DOCKER_HUB_USER/${containerName}:${tag}"
+                    sh "docker push $DOCKER_HUB_USER/${containerName}:${tag}"
+                    echo "Image push complete"
+                }
+            }
         }
-    }
-}
+
         stage('Publish Test Reports') {
             steps {
                 publishHTML([
@@ -68,8 +69,6 @@ pipeline {
                 ])
             }
         }
-
- 
 
         stage('Deploy to Bastion Host') {
             steps {

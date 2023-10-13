@@ -9,7 +9,7 @@ pipeline {
         CONTAINER_NAME = "aquilacms"
         DOCKER_TAG = "latest"
         DOCKER_HUB_USER = "sejalmm06"
-       REACT_APP_THEME ='default_theme_2' 
+        REACT_APP_THEME = 'default_theme_2'
     }
 
     stages {
@@ -18,16 +18,23 @@ pipeline {
                 checkout scm
             }
         }
-stage('Build and Package') {
-    steps {
-        script {
-            sh "npm install"
-            sh "npm run build default_theme_2" // Specify the theme name
-            sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."
+
+        stage('Build and Package') {
+            steps {
+                script {
+                    // Install npm dependencies
+                    sh "npm install"
+
+                    // Build the specified theme (REACT_APP_THEME)
+                    sh "npm run build $REACT_APP_THEME"
+
+                    // Build the Docker image
+                    sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."
+                }
+            }
         }
-    }
-}
-stage('Publish Test Reports') {
+
+        stage('Publish Test Reports') {
             steps {
                 publishHTML([
                     allowMissing: false,

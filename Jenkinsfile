@@ -21,19 +21,8 @@ pipeline {
         stage('Build and Package') {
             steps {
                 script {
-                    // Use Node.js version from Global Tool Configuration
-                    def nodejsTool = tool name: 'NodeJS', type: 'NodeJS'
-
-
-                    if (nodejsTool) {
-                        // Set the PATH to include the selected Node.js installation
-                        env.PATH = "${nodejsTool}/bin:${env.PATH}"
-                    } else {
-                        error("Node.js installation not found")
-                    }
-                }
-
-                sh "npm install" // Install Node.js dependencies
+                    
+             sh "npm install" // Install Node.js dependencies
                 sh "npm run build" // Build your Node.js application
                 sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ." // Build the Docker image
             }

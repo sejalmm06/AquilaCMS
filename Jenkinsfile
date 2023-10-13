@@ -19,14 +19,16 @@ pipeline {
             }
         }
 stage('Build and Package') {
-            steps {
-                script {
-                    sh "npm install"
-                    sh "REACT_APP_THEME=${REACT_APP_THEME} npm run build"
-                    sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."
-                }
+    steps {
+        script {
+            withEnv(['THEME=${REACT_APP_THEME}']) {
+                sh "npm install"
+                sh "npm run build"
+                sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."
             }
         }
+    }
+}
 stage('Publish Test Reports') {
             steps {
                 publishHTML([

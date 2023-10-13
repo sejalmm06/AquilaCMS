@@ -26,10 +26,16 @@ pipeline {
                     sh "npm install"
 
                     // Build the specified theme (REACT_APP_THEME)
-                    //sh "npm run build $REACT_APP_THEME"
+                    sh "npm run build $REACT_APP_THEME"
 
                     // Build the Docker image
                     sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."
+                    
+                    // Push the Docker image to the registry
+                    withCredentials([usernamePassword(credentialsId: 'dockerHubAccount', usernameVariable: 'dockerUser', passwordVariable: 'dockerPassword')]) {
+                        sh "docker login -u $dockerUser -p $dockerPassword"
+                        sh "docker push $dockerUser/${CONTAINER_NAME}:${DOCKER_TAG}"
+                    }
                 }
             }
         }
@@ -48,6 +54,8 @@ pipeline {
                 ])
             }
         }
+
+        // Add your other stages here...
 
         stage('Deploy to Bastion Host') {
             steps {
@@ -93,16 +101,6 @@ pipeline {
                             playbook: "${ANSIBLE_PLAYBOOK}"
                         )
                     }
-                }
-            }
-        }
-
-        stage('Push to Docker Registry') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerHubAccount', usernameVariable: 'dockerUser', passwordVariable: 'dockerPassword')]) {
-                    sh "docker login -u $dockerUser -p $dockerPassword"
-                    sh "docker tag ${CONTAINER_NAME}:${DOCKER_TAG} $dockerUser/${CONTAINER_NAME}:${DOCKER_TAG}"
-                    sh "docker push $dockerUser/${CONTAINER_NAME}:${DOCKER_TAG}"
                 }
             }
         }

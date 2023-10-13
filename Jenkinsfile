@@ -55,21 +55,6 @@ pipeline {
             }
         }
 
-        stage('Publish Test Reports') {
-            steps {
-                publishHTML([
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: false,
-                    keepAll: false,
-                    reportDir: '/var/lib/jenkins/workspace/Insure-Me/target/surefire-reports',
-                    reportFiles: 'index.html',
-                    reportName: 'HTML Report',
-                    reportTitles: '',
-                    useWrapperFileDirectly: true
-                ])
-            }
-        }
-
         stage('Deploy to Bastion Host') {
             steps {
                 script {

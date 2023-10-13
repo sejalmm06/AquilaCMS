@@ -1,6 +1,6 @@
 ---
 - name: Deploy My Project in a Docker Container
-  hosts : all
+  hosts :bastion_host
   become: true
   connection : ssh
   tasks : 

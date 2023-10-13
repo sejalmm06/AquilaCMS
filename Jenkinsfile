@@ -42,12 +42,18 @@ pipeline {
             }
         }
 
-        stage('Docker Push') {
-            steps {
-                sh "docker push $DOCKER_HUB_USER/${CONTAINER_NAME}:${DOCKER_TAG}"
-            }
-        }
+     stage('Docker Tag and Push') {
+    steps {
+        script {
+            def containerName = "aquilacms"
+            def tag = "latest"
 
+            sh "docker tag $CONTAINER_NAME:$DOCKER_TAG" $DOCKER_HUB_USER/$CONTAINER_NAME:$DOCKER_TAG"
+            sh "docker push $DOCKER_HUB_USER/$CONTAINER_NAME:$DOCKER_TAG "
+            echo "Image push complete"
+        }
+    }
+}
         stage('Publish Test Reports') {
             steps {
                 publishHTML([

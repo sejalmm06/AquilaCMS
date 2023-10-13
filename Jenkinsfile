@@ -19,24 +19,32 @@ pipeline {
             }
         }
 
-        stage('Build and Package') {
+       stage('Build and Package') {
             steps {
                 script {
                     // Install npm dependencies
                     sh "npm install"
 
                     // Build the specified theme (REACT_APP_THEME)
-                   // sh "npm run build $REACT_APP_THEME"
+                    //sh "npm run build $REACT_APP_THEME"
 
                     // Build the Docker image
                     sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."
-                    
-                    // Push the Docker image to the registry
-                    withCredentials([usernamePassword(credentialsId: 'dockerHubAccount', usernameVariable: 'dockerUser', passwordVariable: 'dockerPassword')]) {
-                        sh "docker login -u $dockerUser -p $dockerPassword"
-                        sh "docker push $dockerUser/${CONTAINER_NAME}:${DOCKER_TAG}"
-                    }
                 }
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerHubAccount', usernameVariable: 'dockerUser', passwordVariable: 'dockerPassword')]) {
+                    sh "echo $dockerPassword | docker login -u $dockerUser --password-stdin"
+                }
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                sh "docker push $DOCKER_HUB_USER/${CONTAINER_NAME}:${DOCKER_TAG}"
             }
         }
 

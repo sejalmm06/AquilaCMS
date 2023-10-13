@@ -26,7 +26,7 @@ pipeline {
                     sh "npm install"
 
                     // Build the specified theme (REACT_APP_THEME)
-                    sh "npm run build $REACT_APP_THEME"
+                    //sh "npm run build $REACT_APP_THEME"
 
                     // Build the Docker image
                     sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."

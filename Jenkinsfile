@@ -63,7 +63,7 @@ pipeline {
             }
         }
 
-        // Add your other stages here...
+ 
 
         stage('Deploy to Bastion Host') {
             steps {

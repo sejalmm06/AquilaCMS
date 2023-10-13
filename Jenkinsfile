@@ -18,17 +18,18 @@ pipeline {
             }
         }
  stage('Build and Package') {
-            steps {
-                script {
-                    sh "npm install" // Install Node.js dependencies
-                    sh "npm run build" // Build your Node.js application
-                    sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ." // Build the Docker image
-                }
+    steps {
+        script {
+            withEnv(['THEME=your_theme']) {
+                sh "npm install"
+                sh "npm run build"
+                sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."
             }
         }
+    }
+}
 
-
-        stage('Publish Test Reports') {
+stage('Publish Test Reports') {
             steps {
                 publishHTML([
                     allowMissing: false,

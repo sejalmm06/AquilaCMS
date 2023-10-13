@@ -1,44 +1,101 @@
-def containerName="aquilacms"
-def tag="latest"
-def dockerHubUser="sejalmm06"
-def httpPort="8084"
+pipeline {
+    agent any
 
-node {
-    stage('Checkout') {
-        checkout scm
+    environment {
+        ANSIBLE_PLAYBOOK = "ansible-playbook.yml"
+        BASTION_HOST = "3.110.157.9"
+        APP_SERVER = "10.0.2.211"
+        DB_SERVER = "10.0.4.127"
+        CONTAINER_NAME = "aquilacms"
+        DOCKER_TAG = "latest"
+        DOCKER_HUB_USER = "sejalmm06"
     }
-    stage('Build'){
-        sh "mvn clean package"
-    }
-    stage('Publish Test Reports') {
-        publishHTML([
-        allowMissing: false,
-        alwaysLinkToLastBuild: false,
-        keepAll: false,
-        reportDir: '/var/lib/jenkins/workspace/Insure-Me/target/surefire-reports',
-        reportFiles: 'index.html',
-        reportName: 'HTML Report',
-        reportTitles: '',
-        useWrapperFileDirectly: true
-        ])
-    }
-    stage("Image Prune"){
-         sh "docker image prune -a -f"
-    }
-    stage('Image Build'){
-        sh "docker build -t $containerName:$tag --no-cache ."
-        echo "Image build complete"
-    }
-    stage('Push to Docker Registry'){
-        withCredentials([usernamePassword(credentialsId: 'dockerHubAccount', usernameVariable: 'dockerUser', passwordVariable: 'dockerPassword')]) {
-            sh "docker login -u $dockerUser -p $dockerPassword"
-            sh "docker tag $containerName:$tag $dockerUser/$containerName:$tag"
-            sh "docker push $dockerUser/$containerName:$tag"
-            echo "Image push complete"
-     }
-    }
-    stage('Run App') {
-    ansiblePlaybook credentialsId: 'private-key', disableHostKeyChecking: true, installation: 'ansible', inventory: 'hosts', playbook: 'ansible-playbook.yml'
-            
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build and Package') {
+            steps {
+                sh "mvn clean package"
+                sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."
+            }
+        }
+
+        stage('Publish Test Reports') {
+            steps {
+                publishHTML([
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: false,
+                    keepAll: false,
+                    reportDir: '/var/lib/jenkins/workspace/Insure-Me/target/surefire-reports',
+                    reportFiles: 'index.html',
+                    reportName: 'HTML Report',
+                    reportTitles: '',
+                    useWrapperFileDirectly: true
+                ])
+            }
+        }
+
+        stage('Deploy to Bastion Host') {
+            steps {
+                script {
+                    sshagent(['your-ssh-credentials']) {
+                        ansiblePlaybook(
+                            credentialsId: 'private-key',
+                            disableHostKeyChecking: true,
+                            installation: 'ansible',
+                            inventory: "bastion_host=${BASTION_HOST} app_server=${APP_SERVER} db_server=${DB_SERVER}",
+                            playbook: "${ANSIBLE_PLAYBOOK}"
+                        )
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to App Server') {
+            steps {
+                script {
+                    sshagent(['your-ssh-credentials']) {
+                        ansiblePlaybook(
+                            credentialsId: 'private-key',
+                            disableHostKeyChecking: true,
+                            installation: 'ansible',
+                            inventory: "app_server=${APP_SERVER}",
+                            playbook: "${ANSIBLE_PLAYBOOK}"
+                        )
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to DB Server') {
+            steps {
+                script {
+                    sshagent(['your-ssh-credentials']) {
+                        ansiblePlaybook(
+                            credentialsId: 'private-key',
+                            disableHostKeyChecking: true,
+                            installation: 'ansible',
+                            inventory: "db_server=${DB_SERVER}",
+                            playbook: "${ANSIBLE_PLAYBOOK}"
+                        )
+                    }
+                }
+            }
+        }
+
+        stage('Push to Docker Registry') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerHubAccount', usernameVariable: 'dockerUser', passwordVariable: 'dockerPassword')]) {
+                    sh "docker login -u $dockerUser -p $dockerPassword"
+                    sh "docker tag ${CONTAINER_NAME}:${DOCKER_TAG} $dockerUser/${CONTAINER_NAME}:${DOCKER_TAG}"
+                    sh "docker push $dockerUser/${CONTAINER_NAME}:${DOCKER_TAG}"
+                }
+            }
+        }
     }
 }

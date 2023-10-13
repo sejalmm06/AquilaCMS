@@ -62,7 +62,7 @@ pipeline {
                         credentialsId: 'private-key',
                         disableHostKeyChecking: true,
                         installation: 'ansible',
-                        inventory: "bastion_host=${BASTION_HOST} app_server=${APP_SERVER} db_server=${DB_SERVER}",
+                        inventory: "hosts",
                         playbook: "${ANSIBLE_PLAYBOOK}"
                     )
                 }
@@ -76,7 +76,7 @@ pipeline {
                         credentialsId: 'private-key',
                         disableHostKeyChecking: true,
                         installation: 'ansible',
-                        inventory: "app_server=${APP_SERVER}",
+                        inventory: "hosts",
                         playbook: "${ANSIBLE_PLAYBOOK}"
                     )
                 }

@@ -55,18 +55,16 @@ pipeline {
             }
         }
 
-        stage('Deploy to Bastion Host') {
+         stage('Deploy to Bastion Host') {
             steps {
                 script {
-                    sshagent(['your-ssh-credentials']) {
-                        ansiblePlaybook(
-                            credentialsId: 'private-key',
-                            disableHostKeyChecking: true,
-                            installation: 'ansible',
-                            inventory: "bastion_host=${BASTION_HOST} app_server=${APP_SERVER} db_server=${DB_SERVER}",
-                            playbook: "${ANSIBLE_PLAYBOOK}"
-                        )
-                    }
+                    ansiblePlaybook(
+                        credentialsId: 'private-key',
+                        disableHostKeyChecking: true,
+                        installation: 'ansible',
+                        inventory: "bastion_host=${BASTION_HOST} app_server=${APP_SERVER} db_server=${DB_SERVER}",
+                        playbook: "${ANSIBLE_PLAYBOOK}"
+                    )
                 }
             }
         }
@@ -74,15 +72,13 @@ pipeline {
         stage('Deploy to App Server') {
             steps {
                 script {
-                    sshagent(['your-ssh-credentials']) {
-                        ansiblePlaybook(
-                            credentialsId: 'private-key',
-                            disableHostKeyChecking: true,
-                            installation: 'ansible',
-                            inventory: "app_server=${APP_SERVER}",
-                            playbook: "${ANSIBLE_PLAYBOOK}"
-                        )
-                    }
+                    ansiblePlaybook(
+                        credentialsId: 'private-key',
+                        disableHostKeyChecking: true,
+                        installation: 'ansible',
+                        inventory: "app_server=${APP_SERVER}",
+                        playbook: "${ANSIBLE_PLAYBOOK}"
+                    )
                 }
             }
         }
@@ -90,15 +86,13 @@ pipeline {
         stage('Deploy to DB Server') {
             steps {
                 script {
-                    sshagent(['your-ssh-credentials']) {
-                        ansiblePlaybook(
-                            credentialsId: 'private-key',
-                            disableHostKeyChecking: true,
-                            installation: 'ansible',
-                            inventory: "db_server=${DB_SERVER}",
-                            playbook: "${ANSIBLE_PLAYBOOK}"
-                        )
-                    }
+                    ansiblePlaybook(
+                        credentialsId: 'private-key',
+                        disableHostKeyChecking: true,
+                        installation: 'ansible',
+                        inventory: "db_server=${DB_SERVER}",
+                        playbook: "${ANSIBLE_PLAYBOOK}"
+                    )
                 }
             }
         }

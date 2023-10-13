@@ -24,6 +24,7 @@ pipeline {
                     // Use Node.js version from Global Tool Configuration
                     def nodejsTool = tool name: 'Node14', type: 'NodeJS'
 
+
                     if (nodejsTool) {
                         // Set the PATH to include the selected Node.js installation
                         env.PATH = "${nodejsTool}/bin:${env.PATH}"

@@ -18,34 +18,24 @@ pipeline {
             }
         }
 
-        stage('Build and Package') {
+  stage('Build and Package') {
     steps {
         script {
-            // Use Node.js version from Global Tool Configuration
             def nodejsTool = tool name: 'Node14', type: 'NodeJS'
 
             if (nodejsTool) {
-                // Set the PATH to include the selected Node.js installation
                 env.PATH = "${nodejsTool}/bin:${env.PATH}"
             } else {
                 error("Node.js installation not found")
             }
         }
-
-        sh "npm install" // Install Node.js dependencies
-        sh "npm run build" // Build your Node.js application
-        sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ." // Build the Docker image
+        sh "npm install"
+        sh "npm run build"
+        sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."
     }
 }
-Replace 'Node14' with the actual name of your Node.js installation in the Global Tool Configuration. This ensures that the correct Node.js version is used during the build process.
 
-
-
-
-
-
-
-        stage('Publish Test Reports') {
+  stage('Publish Test Reports') {
             steps {
                 publishHTML([
                     allowMissing: false,

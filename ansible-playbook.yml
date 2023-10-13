@@ -20,5 +20,11 @@
     - name: Pull Docker Image
       command: docker pull sejalmm06/aquilacms:latest
 
-    - name: Deploy Docker Container
-      command: docker run -itd -p 8084:8081 aquilacm:latest
+    - name: Create Docker Network
+      command: docker network create aquila
+
+    - name: Run MongoDB Container
+      command: docker run --name mongo -p 27017:27017 --network=aquila mongo
+
+    - name: Run Aquila CMS Container
+      command: docker run -p 127.0.0.1:3010:3010/tcp --network=aquila --name aquila sejalmm06/aquilacms:latest

@@ -20,8 +20,9 @@ pipeline {
 
         stage('Build and Package') {
             steps {
-                sh "mvn clean package"
-                sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."
+                sh "npm install" // Install Node.js dependencies
+                sh "npm run build" // Build your Node.js application
+                sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ." // Build the Docker image
             }
         }
 

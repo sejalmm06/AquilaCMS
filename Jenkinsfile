@@ -21,11 +21,9 @@ pipeline {
 stage('Build and Package') {
     steps {
         script {
-          withEnv(['REACT_APP_THEME=${REACT_APP_THEME}']) {
-                sh "npm install"
-                sh "npm run build"
-                sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."
-            }
+            sh "npm install"
+            sh "npm run build default_theme_2" // Specify the theme name
+            sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."
         }
     }
 }

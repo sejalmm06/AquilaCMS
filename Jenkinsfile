@@ -29,7 +29,7 @@ pipeline {
 
         stage('Back-End Build') {
             steps {
-                dir('backend') {
+
                     sh 'npm install'
                     // Additional build steps for the back-end, like running database migrations
                 }

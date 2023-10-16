@@ -8,7 +8,7 @@ pipeline {
     }
 
     tools {
-        node 'NodeJS' // Use 'node' tool if 'NodeJS' is not recognized
+        nodejs 'NodeJS' // Configure Node.js installation in Jenkins as "NodeJS"
     }
 
     stages {
@@ -56,10 +56,6 @@ pipeline {
         success {
             sh 'docker stop frontend-container backend-container my-database'
             sh 'docker rm frontend-container backend-container my-database'
-        }
-        failure {
-            // Handle failures here, e.g., cleanup or notifications
-            // Add steps to handle failures, such as sending notifications or cleaning up resources
         }
     }
 }

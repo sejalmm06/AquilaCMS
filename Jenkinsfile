@@ -1,100 +1,69 @@
 pipeline {
     agent any
-
+    
     environment {
-        ANSIBLE_PLAYBOOK = "ansible-playbook.yml"
-        BASTION_HOST = "3.110.157.9"
-        APP_SERVER = "10.0.2.211"
-        DB_SERVER = "10.0.4.127"
-        CONTAINER_NAME = "aquilacms"
-        DOCKER_TAG = "latest"
-        DOCKER_HUB_USER = "sejalmm06"
-        REACT_APP_THEME = 'default_theme_2'
+        DOCKER_IMAGE_TAG = "${BUILD_NUMBER}" // Use build number as the Docker image tag
+        FRONTEND_IMAGE = "frontend-app:${DOCKER_IMAGE_TAG}"
+        BACKEND_IMAGE = "backend-app:${DOCKER_IMAGE_TAG}"
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Build and Package') {
+        stage('Front-End Build') {
             steps {
                 script {
-                    // Install npm dependencies
-                    sh "npm install"
-
-                    // Build the specified theme (REACT_APP_THEME)
-                    //sh "npm run build $REACT_APP_THEME"
-
-                    // Build the Docker image
-                    sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."
+                    // Check out and build the front-end application
+                    checkout scm
+                    sh 'cd frontend && npm install'
+                    sh 'cd frontend && npm run build'
                 }
             }
         }
 
-        stage('Docker Login') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerHubAccount', usernameVariable: 'dockerUser', passwordVariable: 'dockerPassword')]) {
-                    sh "echo $dockerPassword | docker login -u $dockerUser --password-stdin"
-                }
-            }
-        }
-
-        stage('Docker Tag and Push') {
+        stage('Back-End Build') {
             steps {
                 script {
-                    def containerName = "aquilacms"
-                    def tag = "latest"
-
-                    sh "docker tag ${containerName}:${tag} $DOCKER_HUB_USER/${containerName}:${tag}"
-                    sh "docker push $DOCKER_HUB_USER/${containerName}:${tag}"
-                    echo "Image push complete"
+                    // Check out and build the back-end application
+                    checkout scm
+                    sh 'cd backend && npm install'
+                    sh 'cd backend && npm run build'
                 }
             }
         }
 
-         stage('Deploy to Bastion Host') {
+        stage('Database Setup') {
             steps {
-                script {
-                    ansiblePlaybook(
-                        credentialsId: 'private-key',
-                        disableHostKeyChecking: true,
-                        installation: 'ansible',
-                        inventory: "hosts",
-                        playbook: "${ANSIBLE_PLAYBOOK}"
-                    )
-                }
+                // Set up a database container (e.g., PostgreSQL)
+                sh 'docker run -d --name my-database -e POSTGRES_PASSWORD=mysecretpassword postgres:latest'
             }
         }
 
-        stage('Deploy to App Server') {
+        stage('Build and Deploy Containers') {
             steps {
-                script {
-                    ansiblePlaybook(
-                        credentialsId: 'private-key',
-                        disableHostKeyChecking: true,
-                        installation: 'ansible',
-                        inventory: "hosts",
-                        playbook: "${ANSIBLE_PLAYBOOK}"
-                    )
-                }
+                // Build Docker images for the front-end and back-end
+                sh "docker build -t ${FRONTEND_IMAGE} frontend"
+                sh "docker build -t ${BACKEND_IMAGE} backend"
+                
+                // Run Docker containers for the front-end, back-end, and link to the database
+                sh "docker run -d --name frontend-container -p 80:80 ${FRONTEND_IMAGE}"
+                sh "docker run -d --name backend-container -p 3000:3000 --link my-database ${BACKEND_IMAGE}"
             }
         }
 
-        stage('Deploy to DB Server') {
+        stage('Integration Tests') {
             steps {
-                script {
-                    ansiblePlaybook(
-                        credentialsId: 'private-key',
-                        disableHostKeyChecking: true,
-                        installation: 'ansible',
-                        inventory: "db_server=${DB_SERVER}",
-                        playbook: "${ANSIBLE_PLAYBOOK}"
-                    )
-                }
+                // Perform integration tests here if needed
             }
+        }
+    }
+
+    post {
+        success {
+            // Cleanup: Stop and remove Docker containers and the database
+            sh 'docker stop frontend-container backend-container my-database'
+            sh 'docker rm frontend-container backend-container my-database'
+        }
+        failure {
+            // Handle failures here (e.g., cleanup)
         }
     }
 }

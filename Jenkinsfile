@@ -18,25 +18,14 @@ pipeline {
             }
         }
 
-        //stage('Front-End Build') {
-            //steps {
-                //dir('frontend') {
-                    //sh 'npm install'
-                    //sh 'npm run build default_theme_2  '
-                //}
-            //}
-        //}
-
         stage('Back-End Build') {
             steps {
-
-                    sh 'npm install'
-                    // Additional build steps for the back-end, like running database migrations
-                     sh 'npm install'
-            sh 'npm run build' // Replace with the actual command to build your backend
-            sh 'npm run migrate-database' // Replace with the command to run database migrations
-            sh 'npm run start-backend' // Replace with the command to start your backend server
-                }
+                sh 'npm install'
+                // Additional build steps for the back-end, like running database migrations
+                sh 'npm install'
+                sh 'npm run build' // Replace with the actual command to build your backend
+                sh 'npm run migrate-database' // Replace with the command to run database migrations
+                sh 'npm run start-backend' // Replace with the command to start your backend server
             }
         }
 

@@ -40,7 +40,28 @@ pipeline {
 
         stage('Build and Deploy Containers') {
             steps {
-                sh "docker build -t ${FRONTEND_IMAGE} frontend"
-                sh "docker build -t ${BACKEND_IMAGE} backend"
-                sh "docker run -d --name frontend-container -p 80:80 ${FRONTEND_IMAGE}"
-                sh "docker
+                script {
+                    // Define Docker build and run commands in a multi-line string
+                    dockerCommands = """
+docker build -t ${FRONTEND_IMAGE} frontend
+docker build -t ${BACKEND_IMAGE} backend
+docker run -d --name frontend-container -p 80:80 ${FRONTEND_IMAGE}
+docker run -d --name backend-container -p 3000:3000 --link my-database ${BACKEND_IMAGE}
+"""
+                    sh dockerCommands
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            sh 'docker stop frontend-container backend-container my-database'
+            sh 'docker rm frontend-container backend-container my-database'
+        }
+        failure {
+            // Handle failures here, e.g., cleanup or notifications
+            // Add steps to handle failures, such as sending notifications or cleaning up resources
+        }
+    }
+}

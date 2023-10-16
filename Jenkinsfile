@@ -7,10 +7,6 @@ pipeline {
         BACKEND_IMAGE = "backend-app:${DOCKER_IMAGE_TAG}"
     }
 
-    tools {
-        node 'NodeJS' // Use 'node' tool for Node.js
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -47,15 +43,4 @@ pipeline {
                 sh "docker build -t ${FRONTEND_IMAGE} frontend"
                 sh "docker build -t ${BACKEND_IMAGE} backend"
                 sh "docker run -d --name frontend-container -p 80:80 ${FRONTEND_IMAGE}"
-                sh "docker run -d --name backend-container -p 3000:3000 --link my-database ${BACKEND_IMAGE}"
-            }
-        }
-    }
-
-    post {
-        success {
-            sh 'docker stop frontend-container backend-container my-database'
-            sh 'docker rm frontend-container backend-container my-database'
-        }
-    }
-}
+                sh "docker

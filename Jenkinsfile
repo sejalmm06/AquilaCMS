@@ -1,4 +1,8 @@
 pipeline {
+    parameters {
+        choice(name: 'THEME', choices: 'theme1\ntheme2\ntheme3', description: 'Select the theme to build')
+    }
+
     agent any
 
     environment {
@@ -41,10 +45,11 @@ pipeline {
         stage('Build and Deploy Containers') {
             steps {
                 script {
-                    // Define Docker build and run commands in a multi-line string
+                    def selectedTheme = "${params.THEME}"
+                    // Define Docker build and run commands with the selected theme
                     dockerCommands = """
-docker build -t ${FRONTEND_IMAGE} frontend
-docker build -t ${BACKEND_IMAGE} backend
+docker build -t ${FRONTEND_IMAGE} frontend --build-arg THEME=${selectedTheme}
+docker build -t ${BACKEND_IMAGE} backend --build-arg THEME=${selectedTheme}
 docker run -d --name frontend-container -p 80:80 ${FRONTEND_IMAGE}
 docker run -d --name backend-container -p 3000:3000 --link my-database ${BACKEND_IMAGE}
 """

@@ -59,9 +59,5 @@ docker run -d --name backend-container -p 3000:3000 --link my-database ${BACKEND
             sh 'docker stop frontend-container backend-container my-database'
             sh 'docker rm frontend-container backend-container my-database'
         }
-        failure {
-            // Handle failures here, e.g., cleanup or notifications
-            // Add steps to handle failures, such as sending notifications or cleaning up resources
-        }
     }
 }

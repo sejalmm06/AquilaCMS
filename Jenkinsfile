@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    
+
     environment {
         DOCKER_IMAGE_TAG = "${BUILD_NUMBER}" // Use build number as the Docker image tag
         FRONTEND_IMAGE = "frontend-app:${DOCKER_IMAGE_TAG}"
@@ -10,29 +10,32 @@ pipeline {
     stages {
         stage('Front-End Build') {
             steps {
+                checkout scm
                 script {
-                    // Check out and build the front-end application
-                    checkout scm
-                    sh 'cd frontend && npm install'
-                    sh 'cd frontend && npm run build'
+                    // Front-end build
+                    dir('frontend') {
+                        sh 'npm install'
+                        sh 'npm run build'
+                    }
                 }
             }
         }
 
         stage('Back-End Build') {
             steps {
+                checkout scm
                 script {
-                    // Check out and build the back-end application
-                    checkout scm
-                    sh 'cd backend && npm install'
-                    sh 'cd backend && npm run build'
+                    // Back-end build
+                    dir('backend') {
+                        sh 'npm install'
+                        // Additional build steps for the back-end, like running database migrations
+                    }
                 }
             }
         }
 
         stage('Database Setup') {
             steps {
-                // Set up a database container (e.g., PostgreSQL)
                 sh 'docker run -d --name my-database -e POSTGRES_PASSWORD=mysecretpassword postgres:latest'
             }
         }

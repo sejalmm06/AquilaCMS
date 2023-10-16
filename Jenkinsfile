@@ -23,9 +23,9 @@ pipeline {
                 //dir('frontend') {
                     //sh 'npm install'
                     //sh 'npm run build default_theme_2  '
-                }
-            }
-        }
+                //}
+            //}
+        //}
 
         stage('Back-End Build') {
             steps {

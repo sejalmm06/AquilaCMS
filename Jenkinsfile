@@ -1,6 +1,6 @@
 pipeline {
     parameters {
-        choice(name: 'THEME', choices: 'theme1\ntheme2\ntheme3', description: 'Select the theme to build')
+        choice(name: 'THEME', choices: 'default_theme_2', description: 'Select the theme to build')
     }
 
     agent any

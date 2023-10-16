@@ -1,14 +1,15 @@
 pipeline {
-    parameters {
-        choice(name: 'THEME', choices: 'default_theme_2', description: 'Select the theme to build')
-    }
-
     agent any
 
     environment {
-        DOCKER_IMAGE_TAG = "${BUILD_NUMBER}"
-        FRONTEND_IMAGE = "frontend-app:${DOCKER_IMAGE_TAG}"
-        BACKEND_IMAGE = "backend-app:${DOCKER_IMAGE_TAG}"
+        ANSIBLE_PLAYBOOK = "ansible-playbook.yml"
+        BASTION_HOST = "3.110.157.9"
+        APP_SERVER = "10.0.2.211"
+        DB_SERVER = "10.0.4.127"
+        CONTAINER_NAME = "aquilacms"
+        DOCKER_TAG = "latest"
+        DOCKER_HUB_USER = "sejalmm06"
+        REACT_APP_THEME = 'default_theme_2'
     }
 
     stages {
@@ -18,44 +19,82 @@ pipeline {
             }
         }
 
-        stage('Back-End Build') {
-            steps {
-                sh 'npm install'
-                // Additional build steps for the back-end, like running database migrations
-                //sh 'npm install'
-               // sh 'npm run build' // Replace with the actual command to build your backend
-                //sh 'npm run migrate-database' // Replace with the command to run database migrations
-                //h 'npm run start-backend' // Replace with the command to start your backend server
-            }
-        }
-
-        stage('Database Setup') {
-            steps {
-                sh 'docker run -d --name my-database -e POSTGRES_PASSWORD=mysecretpassword postgres:latest'
-            }
-        }
-
-        stage('Build and Deploy Containers') {
+        stage('Build and Package') {
             steps {
                 script {
-                    def selectedTheme = "${params.THEME}"
-                    // Define Docker build and run commands with the selected theme
-                    dockerCommands = """
-docker build -t ${FRONTEND_IMAGE} frontend --build-arg THEME=${selectedTheme}
-docker build -t ${BACKEND_IMAGE} backend --build-arg THEME=${selectedTheme}
-docker run -d --name frontend-container -p 80:80 ${FRONTEND_IMAGE}
-docker run -d --name backend-container -p 3000:3000 --link my-database ${BACKEND_IMAGE}
-"""
-                    sh dockerCommands
+                    // Install npm dependencies
+                    sh "npm install"
+
+                    // Build the specified theme (REACT_APP_THEME)
+                    //sh "npm run build $REACT_APP_THEME"
+
+                    // Build the Docker image
+                    sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."
                 }
             }
         }
-    }
 
-    post {
-        success {
-            sh 'docker stop frontend-container backend-container my-database'
-            sh 'docker rm frontend-container backend-container my-database'
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerHubAccount', usernameVariable: 'dockerUser', passwordVariable: 'dockerPassword')]) {
+                    sh "echo $dockerPassword | docker login -u $dockerUser --password-stdin"
+                }
+            }
+        }
+
+        stage('Docker Tag and Push') {
+            steps {
+                script {
+                    def containerName = "aquilacms"
+                    def tag = "latest"
+
+                    sh "docker tag ${containerName}:${tag} $DOCKER_HUB_USER/${containerName}:${tag}"
+                    sh "docker push $DOCKER_HUB_USER/${containerName}:${tag}"
+                    echo "Image push complete"
+                }
+            }
+        }
+
+         stage('Deploy to Bastion Host') {
+            steps {
+                script {
+                    ansiblePlaybook(
+                        credentialsId: 'private-key',
+                        disableHostKeyChecking: true,
+                        installation: 'ansible',
+                        inventory: "hosts",
+                        playbook: "${ANSIBLE_PLAYBOOK}"
+                    )
+                }
+            }
+        }
+
+        stage('Deploy to App Server') {
+            steps {
+                script {
+                    ansiblePlaybook(
+                        credentialsId: 'private-key',
+                        disableHostKeyChecking: true,
+                        installation: 'ansible',
+                        inventory: "hosts",
+                        playbook: "${ANSIBLE_PLAYBOOK}"
+                    )
+                }
+            }
+        }
+
+        stage('Deploy to DB Server') {
+            steps {
+                script {
+                    ansiblePlaybook(
+                        credentialsId: 'private-key',
+                        disableHostKeyChecking: true,
+                        installation: 'ansible',
+                        inventory: "db_server=${DB_SERVER}",
+                        playbook: "${ANSIBLE_PLAYBOOK}"
+                    )
+                }
+            }
         }
     }
 }

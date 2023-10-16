@@ -8,7 +8,7 @@ pipeline {
     }
 
     tools {
-        nodejs 'NodeJS' // Configure Node.js installation in Jenkins as "NodeJS"
+        node 'NodeJS' // Use 'node' tool if 'NodeJS' is not recognized
     }
 
     stages {

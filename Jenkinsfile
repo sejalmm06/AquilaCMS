@@ -18,11 +18,11 @@ pipeline {
             }
         }
 
-        stage('Front-End Build') {
-            steps {
-                dir('frontend') {
-                    sh 'npm install'
-                    sh 'npm run build default_theme_2  '
+        //stage('Front-End Build') {
+            //steps {
+                //dir('frontend') {
+                    //sh 'npm install'
+                    //sh 'npm run build default_theme_2  '
                 }
             }
         }

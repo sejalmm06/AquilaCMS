@@ -22,7 +22,7 @@ pipeline {
             steps {
                 dir('frontend') {
                     sh 'npm install'
-                    sh 'npm run buildde fault_theme_2  '
+                    sh 'npm run build default_theme_2  '
                 }
             }
         }

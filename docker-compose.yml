@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  webapp:
+    build:
+      context: ./backoffice  # Path to the web application's Dockerfile
+    ports:
+      - "80:80"  # Expose the web app on port 80
+    depends_on:
+      - appserver
+
+  appserver:
+    build:
+      context: ./middleware  # Path to the app server's Dockerfile
+    depends_on:
+      - database
+
+  database:
+    image: mongo:latest  # Use the latest MongoDB image
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin  # Replace with your MongoDB username
+      MONGO_INITDB_ROOT_PASSWORD: admin  # Replace with your MongoDB password
+    ports:
+      - "27017:27017"  # Expose MongoDB on port 27017

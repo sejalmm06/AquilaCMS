@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        ANSIBLE_PLAYBOOK = "ansible-playbook.yml"
+       ANSIBLE_PLAYBOOK = "ansible-playbook.yml"
         BASTION_HOST = "3.110.157.9"
         APP_SERVER = "10.0.2.211"
         DB_SERVER = "10.0.4.127"
@@ -59,9 +59,9 @@ pipeline {
         }
  stage('Deploy with Ansible') {
             steps {
-                // Deploy the application using Ansible
-                sh "ansible-playbook -i ${ANSIBLE_PLAYBOOK} -e CONTAINER_NAME=${CONTAINER_NAME} -e DOCKER_TAG=${DOCKER_TAG}"
-                echo "Application deployment with Ansible completed"
+            
+        sh "ansible-playbook -i ${ANSIBLE_PLAYBOOK} -e CONTAINER_NAME=webapp,appserver,database -e DOCKER_TAG=latest"
+        echo "Application deployment with Ansible completed"
             }
         }
     }

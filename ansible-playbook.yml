@@ -1,6 +1,6 @@
 ---
 - name: Deploy Docker Containers
-  hosts: localhost  # You can specify the target hosts here
+  hosts: bastion_host
 
   tasks:
     - name: Copy Docker Compose File

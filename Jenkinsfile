@@ -59,12 +59,3 @@ pipeline {
         }
     }
 
-    //post {
-        //always {
-            //script {
-                // Cleanup or final steps, if needed
-                //sh "docker-compose -f $DOCKER_COMPOSE_FILE down"
-            //}
-        //}
-    //}
-//}

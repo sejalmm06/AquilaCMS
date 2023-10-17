@@ -60,7 +60,8 @@ pipeline {
  stage('Deploy with Ansible') {
             steps {
             
-        sh "ansible-playbook -i ${ANSIBLE_PLAYBOOK} -e CONTAINER_NAME=webapp,appserver,database -e DOCKER_TAG=latest"
+        stage('Run App') {
+    ansiblePlaybook credentialsId: 'private-key', disableHostKeyChecking: true, installation: 'ansible', inventory: 'hosts', playbook: 'ansible-playbook.yml'
         echo "Application deployment with Ansible completed"
             }
         }

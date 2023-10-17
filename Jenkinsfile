@@ -22,9 +22,9 @@ pipeline {
         stage('Build and Package') {
             steps {
                 script {
-                    // Install npm dependencies
-                    sh "npm install"
-                    sh 'npm run build'
+              def themeName = params.THEME_NAME
+            sh "npm install"                             // Install project dependencies
+            sh "npm run build ${themeName}"  
                     //Build the Docker image
                     sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."
                 }

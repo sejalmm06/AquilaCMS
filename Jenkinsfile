@@ -24,7 +24,7 @@ pipeline {
                 script {
               def themeName = params.THEME_NAME
             sh "npm install"                             // Install project dependencies
-            sh "npm run build ${themeName}"  
+            sh "npm run build default_theme_2"  
                     //Build the Docker image
                     sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."
                 }

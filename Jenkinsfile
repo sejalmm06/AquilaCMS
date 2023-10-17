@@ -57,6 +57,12 @@ pipeline {
                 }
             }
         }
+ stage('Deploy with Ansible') {
+            steps {
+                // Deploy the application using Ansible
+                sh "ansible-playbook -i ${ANSIBLE_PLAYBOOK} -e CONTAINER_NAME=${CONTAINER_NAME} -e DOCKER_TAG=${DOCKER_TAG}"
+                echo "Application deployment with Ansible completed"
+            }
+        }
     }
-
 }

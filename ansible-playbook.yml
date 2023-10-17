@@ -1,21 +1,39 @@
 ---
-- name: Deploy My Project in a Docker Container
-  hosts: bastion_host
-  become: true
+- name: Deploy Docker Containers
+  hosts: "{{ APP_SERVER }}"
+  become: yes  # Use sudo to run Docker commands
+
   tasks:
-    - name: Updating apt
-      apt:
-        update_cache: yes
+    - name: Copy Docker Compose File
+      copy:
+        src: "{{ DOCKER_COMPOSE_FILE }}"
+        dest: /path/to/remote/docker-compose.yml
+      when: DOCKER_COMPOSE_FILE is defined
 
-    - name: Install Docker
-      apt:
-        name: docker.io
-        state: present
+    - name: Pull Docker Images
+      loop:
+        - "{{ DOCKER_HUB_USER }}/{{ item }}:{{ DOCKER_TAG }}"
+      docker_image:
+        name: "{{ item }}"
+        source: pull
+      when: DOCKER_HUB_USER is defined and DOCKER_TAG is defined
+      loop_control:
+        loop_var: item
 
-    - name: Start Docker Service
-      service:
-        name: docker
+    - name: Start Docker Containers
+      loop:
+        - "{{ DOCKER_HUB_USER }}/{{ item }}:{{ DOCKER_TAG }}"
+      docker_container:
+        name: "{{ item }}"
+        image: "{{ item }}"
         state: started
+        restart_policy: always
+      when: DOCKER_HUB_USER is defined and DOCKER_TAG is defined
+      loop_control:
+        loop_var: item
 
-    - name: Deploy Docker Container
-      command: docker run -itd -p 3010:3010 sejalmm06/aquilacms:latest
+    - name: Ensure Docker Compose Services are Running
+      command: docker-compose -f /path/to/remote/docker-compose.yml up -d
+      args:
+        creates: /path/to/remote/docker-compose.yml  # Check if the file exists
+      when: DOCKER_COMPOSE_FILE is defined

@@ -1,7 +1,6 @@
 ---
 - name: Deploy Docker Containers
-  hosts: "{{ APP_SERVER }}"
-  become: yes  # Use sudo to run Docker commands
+  hosts: localhost  # You can specify the target hosts here
 
   tasks:
     - name: Copy Docker Compose File
@@ -33,7 +32,7 @@
         loop_var: item
 
     - name: Ensure Docker Compose Services are Running
-      command: docker-compose -f /path/to/remote/docker-compose.yml up -d
+      command: docker-compose -f docker-compose.yml up -d
       args:
-        creates:docker-compose.yml  # Check if the file exists
+        creates: docker-compose.yml  # Check if the file exists
       when: DOCKER_COMPOSE_FILE is defined

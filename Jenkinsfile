@@ -6,7 +6,7 @@ pipeline {
         BASTION_HOST = "3.110.157.9"
         APP_SERVER = "10.0.2.211"
         DB_SERVER = "10.0.4.127"
-        CONTAINER_NAME = "aquilacms"
+        CONTAINER_NAME = "webapp,appserver,database"
         DOCKER_TAG = "latest"
         DOCKER_HUB_USER = "sejalmm06"
         REACT_APP_THEME = 'default_theme_2'

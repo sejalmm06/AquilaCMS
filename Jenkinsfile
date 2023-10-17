@@ -10,6 +10,7 @@ pipeline {
         DOCKER_TAG = "latest"
         DOCKER_HUB_USER = "sejalmm06"
         REACT_APP_THEME = 'default_theme_2'
+        DOCKER_COMPOSE_FILE = 'docker-compose.yml' 
     }
 
     stages {
@@ -26,7 +27,7 @@ pipeline {
             sh "npm install"                            
             //sh "npm run build default_theme_2"  
                     //Build the Docker image
-                    sh "docker build -t ${CONTAINER_NAME}:${DOCKER_TAG} ."
+                  sh "docker-compose -f $DOCKER_COMPOSE_FILE build"
                 }
             }
         }
@@ -42,55 +43,27 @@ pipeline {
         stage('Docker Tag and Push') {
             steps {
                 script {
-                    def containerName = "aquilacms"
-                    def tag = "latest"
-
-                    sh "docker tag ${containerName}:${tag} $DOCKER_HUB_USER/${containerName}:${tag}"
-                    sh "docker push $DOCKER_HUB_USER/${containerName}:${tag}"
+                  sh "docker-compose -f $DOCKER_COMPOSE_FILE push"
                     echo "Image push complete"
                 }
             }
         }
 
-         stage('Deploy to Bastion Host') {
+        stage('Deploy with Docker Compose') {
             steps {
                 script {
-                    ansiblePlaybook(
-                        credentialsId: 'private-key',
-                        disableHostKeyChecking: true,
-                        installation: 'ansible',
-                        inventory: "hosts",
-                        playbook: "${ANSIBLE_PLAYBOOK}"
-                    )
+                    // Deploy the application using Docker Compose
+                    sh "docker-compose -f $DOCKER_COMPOSE_FILE up -d"
                 }
             }
         }
+    }
 
-        stage('Deploy to App Server') {
-            steps {
-                script {
-                    ansiblePlaybook(
-                        credentialsId: 'private-key',
-                        disableHostKeyChecking: true,
-                        installation: 'ansible',
-                        inventory: "hosts",
-                        playbook: "${ANSIBLE_PLAYBOOK}"
-                    )
-                }
-            }
-        }
-
-        stage('Deploy to DB Server') {
-            steps {
-                script {
-                    ansiblePlaybook(
-                        credentialsId: 'private-key',
-                        disableHostKeyChecking: true,
-                        installation: 'ansible',
-                        inventory: "db_server=${DB_SERVER}",
-                        playbook: "${ANSIBLE_PLAYBOOK}"
-                    )
-                }
+    post {
+        always {
+            script {
+                // Cleanup or final steps, if needed
+                sh "docker-compose -f $DOCKER_COMPOSE_FILE down"
             }
         }
     }

@@ -60,7 +60,7 @@ pipeline {
  stage('Deploy with Ansible') {
             steps {
             
-        stage('Run App') {
+        
     ansiblePlaybook credentialsId: 'private-key', disableHostKeyChecking: true, installation: 'ansible', inventory: 'hosts', playbook: 'ansible-playbook.yml'
         echo "Application deployment with Ansible completed"
             }

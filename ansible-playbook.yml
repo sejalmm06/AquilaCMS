@@ -7,7 +7,7 @@
     - name: Copy Docker Compose File
       copy:
         src: "{{ DOCKER_COMPOSE_FILE }}"
-        dest: /path/to/remote/docker-compose.yml
+        dest: docker-compose.yml
       when: DOCKER_COMPOSE_FILE is defined
 
     - name: Pull Docker Images
@@ -35,5 +35,5 @@
     - name: Ensure Docker Compose Services are Running
       command: docker-compose -f /path/to/remote/docker-compose.yml up -d
       args:
-        creates: /path/to/remote/docker-compose.yml  # Check if the file exists
+        creates:docker-compose.yml  # Check if the file exists
       when: DOCKER_COMPOSE_FILE is defined
